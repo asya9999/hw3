@@ -10,6 +10,7 @@ from Resampling import Resampling
 from matplotlib import pyplot as plt
 from matplotlib import figure as fig
 import time
+import math
 
 def visualize_map(occupancy_map):
     fig = plt.figure()
@@ -47,8 +48,25 @@ def init_particles_freespace(num_particles, occupancy_map):
     """
     TODO : Add your code here
     """
+    points = 0
+    particles = []
 
+    while points < num_particles:
 
+        points += 1
+
+        # Let's check out map
+        # Choose places, where x can appear
+        y_range = np.random(3800, 6800)
+        x_range = np.random(0, 7200)
+
+        # Point on map should be not accupied
+        if (0<= occupancy_map[int(x_range)][int(x_range)] < 0.1 ):
+            particles.append([x_range, y_range, np.random(-math.pi, math.pi), (1.0 / num_particles)])
+        else:
+            points -= 1
+
+    X_bar_init = particles
     return X_bar_init
 
 def main():
