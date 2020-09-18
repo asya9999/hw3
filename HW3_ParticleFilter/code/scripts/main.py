@@ -12,6 +12,14 @@ from matplotlib import figure as fig
 import time
 import math
 
+import numpy as np
+from random import randint
+import random
+
+random.seed(1)
+np.random.seed(1)
+
+
 def visualize_map(occupancy_map):
     fig = plt.figure()
     # plt.switch_backend('TkAgg')
@@ -24,6 +32,7 @@ def visualize_timestep(X_bar, tstep):
     y_locs = X_bar[:,1]/10.0
     scat = plt.scatter(x_locs, y_locs, c='r', marker='o')
     plt.pause(0.00001)
+    #plt.savefig("./1/" + str(b) + "_" + str(e) + ".png")
     scat.remove()
 
 def init_particles_random(num_particles, occupancy_map):
@@ -38,7 +47,7 @@ def init_particles_random(num_particles, occupancy_map):
     w0_vals = w0_vals / num_particles
 
     X_bar_init = np.hstack((x0_vals,y0_vals,theta0_vals,w0_vals))
-
+    
     return X_bar_init
 
 def init_particles_freespace(num_particles, occupancy_map):
@@ -47,33 +56,44 @@ def init_particles_freespace(num_particles, occupancy_map):
 
     """
     TODO : Add your code here
-    """
+    """ 
+
     points = 0
     particles = []
 
-    while points < num_particles:
+    # Point on map, which are not occupied
+    x_and_y = []
 
-        points += 1
+    for i in range(occupancy_map.shape[0]):
+        for j in range(occupancy_map.shape[1]):
+            if occupancy_map[i, j]==0:
+                x_and_y.append( [j,i] )
 
-        # Let's check out map
-        # Choose places, where x can appear
-        y_range = np.random(3800, 6800)
-        x_range = np.random(0, 7200)
 
-        # Point on map should be not accupied
-        if (0<= occupancy_map[int(x_range)][int(x_range)] < 0.1 ):
-            particles.append([x_range, y_range, np.random(-math.pi, math.pi), (1.0 / num_particles)])
-        else:
-            points -= 1
+    # Choose randomly X and Y on map
+    idexes = [randint(0,len(x_and_y) ) for i in range(num_particles)]
 
-    X_bar_init = particles
+    # Init x and y
+    x0_vals = [ [x_and_y[i][0]*10] for i in idexes]
+    y0_vals = [ [x_and_y[i][1]*10] for i in idexes]
+
+    # Init angle
+    theta0_vals = np.random.uniform( -math.pi, math.pi, (num_particles, 1) )
+
+    # initialize weights for all particles
+    w0_vals = np.ones( (num_particles,1), dtype=np.float64)
+    w0_vals = w0_vals / num_particles
+
+    # Combine all parameters
+    X_bar_init = np.hstack((x0_vals, y0_vals, theta0_vals, w0_vals))
+
     return X_bar_init
 
 def main():
 
     """
     Description of variables used
-    u_t0 : particle state odometry reading [x, y, theta] at time (t-1) [odometry_frame]
+    u_t0 : particle state odometry reading [x, y, theta] at time (t-1) [odometry_frame]   
     u_t1 : particle state odometry reading [x, y, theta] at time t [odometry_frame]
     x_t0 : particle state belief [x, y, theta] at time (t-1) [world_frame]
     x_t1 : particle state belief [x, y, theta] at time t [world_frame]
@@ -88,15 +108,15 @@ def main():
     src_path_log = '../data/log/robotdata1.log'
 
     map_obj = MapReader(src_path_map)
-    occupancy_map = map_obj.get_map()
+    occupancy_map = map_obj.get_map() 
     logfile = open(src_path_log, 'r')
 
     motion_model = MotionModel()
     sensor_model = SensorModel(occupancy_map)
     resampler = Resampling()
 
-    num_particles = 500
-    X_bar = init_particles_random(num_particles, occupancy_map)
+    num_particles = 1000
+    X_bar = init_particles_freespace(num_particles, occupancy_map)
 
     vis_flag = 1
 
@@ -116,13 +136,13 @@ def main():
         odometry_robot = meas_vals[0:3] # odometry reading [x, y, theta] in odometry frame
         time_stamp = meas_vals[-1]
 
-        # if ((time_stamp <= 0.0) | (meas_type == "O")): # ignore pure odometry measurements for now (faster debugging)
+        # if ((time_stamp <= 0.0) | (meas_type == "O")): # ignore pure odometry measurements for now (faster debugging) 
             # continue
 
         if (meas_type == "L"):
              odometry_laser = meas_vals[3:6] # [x, y, theta] coordinates of laser in odometry frame
              ranges = meas_vals[6:-1] # 180 range measurement values from single laser scan
-
+        
         print("Processing time step " + str(time_idx) + " at time " + str(time_stamp) + "s")
 
         if (first_time_idx):
@@ -149,7 +169,7 @@ def main():
                 X_bar_new[m,:] = np.hstack((x_t1, w_t))
             else:
                 X_bar_new[m,:] = np.hstack((x_t1, X_bar[m,3]))
-
+        
         X_bar = X_bar_new
         u_t0 = u_t1
 

@@ -23,7 +23,7 @@ class SensorModel:
         self.map = occupancy_map
 
         # Weuight
-        self.zh = 10000
+        self.zh = 100
         self.zs = 0.01
         self.zm = 0.01
         self.zr = 100000
@@ -35,7 +35,7 @@ class SensorModel:
         
         # sensor position offset (cm)
         self.laser_offset = 25
-        self.step_size = 10
+        self.step_size = 5
 
     # 1. Local measurement noise - Gaussian distribution
     def p_hit(self, z_tk, z_tk_star):

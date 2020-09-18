@@ -17,19 +17,24 @@ class Resampling:
         param[in] X_bar : [num_particles x 4] sized array containing [x, y, theta, wt] values for all particles
         param[out] X_bar_resampled : [num_particles x 4] sized array containing [x, y, theta, wt] values for resampled set of particles
         """
-        #Principle of the low variance resampling procedure starts herer
+        # Principle of the low variance resampling procedure starts here
+        X_bar = np.array(X_bar)
         X_bar_resampled = []
-        r = random.uniform(0, 1/len(X_bar)) #this we are drawing from unifrom distribution which points to exactly one particle
-        wt = X_bar[:][3]
-        wt /= np.array(wt)/sum(wt) #sample weight
+        # Еhis we are drawing from unifrom distribution which points to exactly one particle
+        r = random.uniform(0, 1/len(X_bar)) 
+        wt = np.array(X_bar[:,3])/sum(X_bar[:,3]) #sample weight
         const, i, m = wt[0], 0, 0
-        for m in range(len(X_bar)):
-            u = r + m/len(X_bar)  # We choose a random number r and then select those particles
-            while const<u: #check whether i is the index of the first particle such that the corresponding sum of weights exceeds u
+        while m < len(X_bar):
+            # We choose a random number r and then select those particles
+            u = r + m/len(X_bar)
+            # Сheck whether i is the index of the first particle such that the corresponding sum of weights exceeds u
+            while const<u: 
                 i +=1
-                const +=wt[i] # compute the sum in the righthand side of the eguation
+                # Сompute the sum in the righthand side of the eguation
+                const +=wt[i]
             X_bar_resampled.append(X_bar[i])
-        return np.asarray(X_bar_resampled)
+            m +=1
+        return np.array(X_bar_resampled)
 
 if __name__ == "__main__":
     pass
