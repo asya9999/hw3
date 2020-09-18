@@ -37,7 +37,7 @@ def init_particles_random(num_particles, occupancy_map):
     w0_vals = w0_vals / num_particles
 
     X_bar_init = np.hstack((x0_vals,y0_vals,theta0_vals,w0_vals))
-    
+
     return X_bar_init
 
 def init_particles_freespace(num_particles, occupancy_map):
@@ -46,16 +46,8 @@ def init_particles_freespace(num_particles, occupancy_map):
 
     """
     TODO : Add your code here
-    """ 
+    """
 
-    x, y = np.where(occupancy_map == 0)
-    idx = np.random.choice(np.arange(len(x)), num_particles, replace=False)
-    x0_vals = y[idx].reshape(len(idx),1) * 10.
-    y0_vals = x[idx].reshape(len(idx),1) * 10.
-    theta0_vals = np.random.uniform( -3.14, 3.14, (num_particles, 1) )
-    w0_vals = np.ones( (num_particles,1), dtype=np.float64)
-    w0_vals = w0_vals / num_particles
-    X_bar_init = np.hstack((x0_vals,y0_vals,theta0_vals,w0_vals))
 
     return X_bar_init
 
@@ -63,7 +55,7 @@ def main():
 
     """
     Description of variables used
-    u_t0 : particle state odometry reading [x, y, theta] at time (t-1) [odometry_frame]   
+    u_t0 : particle state odometry reading [x, y, theta] at time (t-1) [odometry_frame]
     u_t1 : particle state odometry reading [x, y, theta] at time t [odometry_frame]
     x_t0 : particle state belief [x, y, theta] at time (t-1) [world_frame]
     x_t1 : particle state belief [x, y, theta] at time t [world_frame]
@@ -78,7 +70,7 @@ def main():
     src_path_log = '../data/log/robotdata1.log'
 
     map_obj = MapReader(src_path_map)
-    occupancy_map = map_obj.get_map() 
+    occupancy_map = map_obj.get_map()
     logfile = open(src_path_log, 'r')
 
     motion_model = MotionModel()
@@ -106,13 +98,13 @@ def main():
         odometry_robot = meas_vals[0:3] # odometry reading [x, y, theta] in odometry frame
         time_stamp = meas_vals[-1]
 
-        # if ((time_stamp <= 0.0) | (meas_type == "O")): # ignore pure odometry measurements for now (faster debugging) 
+        # if ((time_stamp <= 0.0) | (meas_type == "O")): # ignore pure odometry measurements for now (faster debugging)
             # continue
 
         if (meas_type == "L"):
              odometry_laser = meas_vals[3:6] # [x, y, theta] coordinates of laser in odometry frame
              ranges = meas_vals[6:-1] # 180 range measurement values from single laser scan
-        
+
         print("Processing time step " + str(time_idx) + " at time " + str(time_stamp) + "s")
 
         if (first_time_idx):
@@ -139,7 +131,7 @@ def main():
                 X_bar_new[m,:] = np.hstack((x_t1, w_t))
             else:
                 X_bar_new[m,:] = np.hstack((x_t1, X_bar[m,3]))
-        
+
         X_bar = X_bar_new
         u_t0 = u_t1
 
