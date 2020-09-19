@@ -16,16 +16,11 @@ import numpy as np
 from random import randint
 import random
 
-random.seed(1)
-np.random.seed(1)
-
 
 def visualize_map(occupancy_map):
     fig = plt.figure()
-    # plt.switch_backend('TkAgg')
     mng = plt.get_current_fig_manager();  # mng.resize(*mng.window.maxsize())
     plt.ion(); plt.imshow(occupancy_map, cmap='Greys'); plt.axis([0, 800, 0, 800]);
-
 
 def visualize_timestep(X_bar, tstep):
     x_locs = X_bar[:,0]/10.0
@@ -35,8 +30,36 @@ def visualize_timestep(X_bar, tstep):
     #plt.savefig("./1/" + str(b) + "_" + str(e) + ".png")
     scat.remove()
 
-def init_particles_random(num_particles, occupancy_map):
 
+# For ray visualization
+def visualize_timestep_2(X_bar, tstep):
+    x_locs = X_bar[:,0]/10.0
+    y_locs = X_bar[:,1]/10.0
+    scat = plt.scatter(x_locs, y_locs, c='r', marker='o')
+
+    thetas =  X_bar[:,2]
+    # 25 cm
+    length = 25
+   
+    lines = []
+    for i in range(len(x_locs)):
+        theta =  X_bar[i,2]
+        #print(theta)
+        end_x = x_locs[i] + length*np.cos(theta)
+        end_y = y_locs[i] + length*np.sin(theta)
+
+        draw = plt.plot([x_locs[i], end_x], [y_locs[i], end_y], 'b-', linewidth=1)
+        lines.append(draw)
+
+    
+    #print(lines)v
+    #plt.savefig("./1/" + str(b) + "_" + str(e) + ".png")
+    plt.pause(0.00001)
+    scat.remove()
+    [ i.pop(0).remove() for i in lines]
+
+def init_particles_random(num_particles, occupancy_map):
+    
     # initialize [x, y, theta] positions in world_frame for all particles
     y0_vals = np.random.uniform( 0, 7000, (num_particles, 1) )
     x0_vals = np.random.uniform( 3000, 7000, (num_particles, 1) )
@@ -49,6 +72,7 @@ def init_particles_random(num_particles, occupancy_map):
     X_bar_init = np.hstack((x0_vals,y0_vals,theta0_vals,w0_vals))
     
     return X_bar_init
+  
 
 def init_particles_freespace(num_particles, occupancy_map):
 
@@ -115,7 +139,7 @@ def main():
     sensor_model = SensorModel(occupancy_map)
     resampler = Resampling()
 
-    num_particles = 1000
+    num_particles = 700
     X_bar = init_particles_freespace(num_particles, occupancy_map)
 
     vis_flag = 1
@@ -142,6 +166,7 @@ def main():
         if (meas_type == "L"):
              odometry_laser = meas_vals[3:6] # [x, y, theta] coordinates of laser in odometry frame
              ranges = meas_vals[6:-1] # 180 range measurement values from single laser scan
+
         
         print("Processing time step " + str(time_idx) + " at time " + str(time_stamp) + "s")
 
@@ -179,6 +204,8 @@ def main():
         X_bar = resampler.low_variance_sampler(X_bar)
 
         if vis_flag:
+            # meas_vals[3:6] - [x, y, theta] coordinates of laser in odometry frame
+            # meas_vals[6:-1] # 180 range measurement values from single laser scan
             visualize_timestep(X_bar, time_idx)
 
 if __name__=="__main__":

@@ -20,7 +20,7 @@ class Resampling:
         # Principle of the low variance resampling procedure starts here
         X_bar = np.array(X_bar)
         X_bar_resampled = []
-        # Еhis we are drawing from unifrom distribution which points to exactly one particle
+        # This we are drawing from unifrom distribution which points to exactly one particle
         r = random.uniform(0, 1/len(X_bar)) 
         wt = np.array(X_bar[:,3])/sum(X_bar[:,3]) #sample weight
         const, i, m = wt[0], 0, 0

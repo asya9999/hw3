@@ -23,12 +23,11 @@ class SensorModel:
         self.map = occupancy_map
 
         # Weuight
-        self.zh = 100
+        self.zh = 1000
         self.zs = 0.01
         self.zm = 0.01
         self.zr = 100000
 
-        # 
         self.Z_MAX = 8183
         self.hit_sigma = 200
         self.sl = 0.01
@@ -81,7 +80,7 @@ class SensorModel:
     # Ray casting
     def ray_casting(self, x_t1):
 
-        step = 2
+        step = 1
         x_t1[0] = int(x_t1[0]/10)
         x_t1[1] = int(x_t1[1]/10) 
 
